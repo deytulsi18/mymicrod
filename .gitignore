@@ -1,0 +1,15 @@
+# Local environment files
+.env
+.env.*
+
+# Dependencies and build output
+node_modules/
+dist/
+
+# Local Netlify files
+.netlify/
+
+# Editor and OS files
+.vscode/
+.DS_Store
+Thumbs.db
