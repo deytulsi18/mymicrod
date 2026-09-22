@@ -10,7 +10,6 @@ const editingEntryId = ref(null)
 const theme = ref('light')
 const toast = ref({ show: false, message: '', type: 'success' })
 const confirmAction = ref(null)
-const dateInput = ref(null)
 const isLoading = ref(true)
 const isSaving = ref(false)
 
@@ -267,13 +266,6 @@ function cancelConfirm() {
   confirmAction.value = null
 }
 
-function openDatePicker() {
-  if (dateInput.value) {
-    dateInput.value.showPicker?.()
-    dateInput.value.click()
-  }
-}
-
 onMounted(() => {
   loadDiary()
   loadTheme()
@@ -297,12 +289,14 @@ watch(theme, saveTheme)
           :aria-label="`Switch theme, current ${theme}`"
           @click="toggleTheme"
           :title="`Current theme: ${theme}`"
+          :disabled="isSaving"
         >
           <span aria-hidden="true">{{ themeIcon }}</span>
         </button>
 
-        <label class="date-picker" @click="openDatePicker">
-          <input ref="dateInput" v-model="selectedDate" type="date" />
+        <label class="date-picker">
+          <span class="sr-only">Select diary date</span>
+          <input v-model="selectedDate" type="date" aria-label="Select diary date" :disabled="isSaving" />
         </label>
       </div>
     </header>
@@ -314,6 +308,7 @@ watch(theme, saveTheme)
         :maxlength="MAX_ENTRY_LENGTH"
         :placeholder="editingEntryId ? 'edit your entry...' : 'what happened today?'"
         aria-label="Diary entry"
+        :disabled="isSaving"
       />
 
       <div class="composer-actions">
@@ -321,8 +316,8 @@ watch(theme, saveTheme)
 
         <div class="composer-actions-right">
           <span class="char-count">{{ draft.length }}/{{ MAX_ENTRY_LENGTH }}</span>
-          <button v-if="editingEntryId" class="secondary-btn" type="button" @click="cancelEdit">cancel</button>
-          <button @click="openSaveConfirm" type="button">{{ editingEntryId ? 'update' : 'save' }}</button>
+          <button v-if="editingEntryId" class="secondary-btn" type="button" @click="cancelEdit" :disabled="isSaving">cancel</button>
+          <button @click="openSaveConfirm" type="button" :disabled="isSaving">{{ editingEntryId ? 'update' : 'save' }}</button>
         </div>
       </div>
     </section>
@@ -340,10 +335,10 @@ watch(theme, saveTheme)
             <h3>{{ getTimeLabel(entry.createdAt) }}</h3>
 
             <div class="entry-actions">
-              <button class="icon-btn" type="button" @click="startEdit(entry)" aria-label="Edit entry" title="Edit entry">
+              <button class="icon-btn" type="button" @click="startEdit(entry)" aria-label="Edit entry" title="Edit entry" :disabled="isSaving">
                 ✎
               </button>
-              <button class="icon-btn danger" type="button" @click="openDeleteConfirm(day.date, entry.id)" aria-label="Delete entry" title="Delete entry">
+              <button class="icon-btn danger" type="button" @click="openDeleteConfirm(day.date, entry.id)" aria-label="Delete entry" title="Delete entry" :disabled="isSaving">
                 ✖
               </button>
             </div>
@@ -358,14 +353,14 @@ watch(theme, saveTheme)
       {{ toast.message }}
     </div>
 
-    <div v-if="confirmAction" class="modal-backdrop" @click="cancelConfirm">
+    <div v-if="confirmAction" class="modal-backdrop" @click="!isSaving && cancelConfirm()">
       <div class="confirm-modal" @click.stop>
         <h3>{{ confirmAction.mode === 'delete' ? 'Delete entry?' : editingEntryId ? 'Update entry?' : 'Save entry?' }}</h3>
         <p>{{ confirmAction.mode === 'delete' ? 'This action cannot be undone.' : 'This will store the current diary text.' }}</p>
         <div class="modal-actions">
-          <button class="modal-btn-secondary" type="button" @click="cancelConfirm">cancel</button>
-          <button v-if="confirmAction.mode === 'delete'" class="modal-btn" type="button" @click="confirmDelete">delete</button>
-          <button v-else class="modal-btn" type="button" @click="confirmSave">confirm</button>
+          <button class="modal-btn-secondary" type="button" @click="cancelConfirm" :disabled="isSaving">cancel</button>
+          <button v-if="confirmAction.mode === 'delete'" class="modal-btn" type="button" @click="confirmDelete" :disabled="isSaving">delete</button>
+          <button v-else class="modal-btn" type="button" @click="confirmSave" :disabled="isSaving">confirm</button>
         </div>
       </div>
     </div>
