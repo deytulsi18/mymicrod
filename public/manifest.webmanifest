@@ -1,0 +1,18 @@
+{
+  "name": "Micro Diary",
+  "short_name": "Micro Diary",
+  "description": "A tiny diary for daily thoughts.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f1ea",
+  "theme_color": "#f5f1ea",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
