@@ -36,6 +36,20 @@ function sortDiaryByDate() {
     .sort((a, b) => b.date.localeCompare(a.date))
 }
 
+function groupEntriesByDate(entries) {
+  const days = new Map()
+
+  for (const entry of entries) {
+    if (!entry || typeof entry.date !== 'string') continue
+
+    const day = days.get(entry.date) || { date: entry.date, entries: [] }
+    day.entries.push(entry)
+    days.set(entry.date, day)
+  }
+
+  return [...days.values()]
+}
+
 const orderedDays = computed(() => {
   return [...diary.value]
     .map((day) => ({
@@ -96,7 +110,7 @@ async function loadDiary() {
     if (!response.ok) throw new Error('Failed to load diary')
 
     const parsed = await response.json()
-    diary.value = Array.isArray(parsed) ? parsed : []
+    diary.value = Array.isArray(parsed) ? groupEntriesByDate(parsed) : []
     sortDiaryByDate()
   } catch (error) {
     console.error(error)
